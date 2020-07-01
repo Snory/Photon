@@ -5,7 +5,7 @@ using Photon.Pun;
 using Photon.Realtime;
 using System.Linq;
 
-public class GameManager : MonoBehaviourPunCallbacks
+public class GameManager : MonoBehaviourPun
 {
     [Header("Stats")]
 

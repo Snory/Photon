@@ -26,6 +26,9 @@ public class PlayerController : MonoBehaviourPunCallbacks
     public Player PhotonPlayer;
 
 
+    private Coroutine _movingRoutine;
+
+
     [PunRPC]
     public void Initialize(Player player)
     {
@@ -52,9 +55,52 @@ public class PlayerController : MonoBehaviourPunCallbacks
 
     private void Move()
     {
-        Vector3 direction = new Vector3(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"), 0);
-        Vector3 velocity = direction * MoveSpeed;
-        _body.velocity = velocity;
+
+        if (Input.GetMouseButtonDown(0)) { 
+            if(PathFinder.Instance == null)
+            {
+                Debug.LogError("[PlayerController]: PathFinder is not available");
+            }
+
+            if (PathFinder.Instance.WalkableTileMap == null)
+            {
+                Debug.LogError("[PlayerController]: WalkableTileMap is not available");
+            }
+
+            HexTile destination = PathFinder.Instance.WalkableTileMap.GetHexTileOnWorldPosition(Camera.main.ScreenToWorldPoint(Input.mousePosition));
+
+            //Vector3 direction = new Vector3(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"), 0);
+            //Vector3 velocity = direction * MoveSpeed;
+            //_body.velocity = velocity;
+
+            if(destination != null) {
+                if(_movingRoutine != null)
+                {
+                    StopCoroutine(_movingRoutine);
+                }
+                _movingRoutine =  StartCoroutine(MoveToPosition(destination.WorldCoordination));
+            }
+        }
+    
+    }
+
+    private IEnumerator MoveToPosition(Vector3 destination)
+    {
+        while (true)
+        {
+            if(this.transform.position != destination)
+            {
+                this.transform.position = Vector3.MoveTowards(this.transform.position, destination, Time.deltaTime * MoveSpeed);
+                yield return null;
+            } else
+            {
+                yield break;
+            }
+
+        }
+
+        
+
     }
 
     private void Rotate()
