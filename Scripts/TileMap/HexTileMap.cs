@@ -43,7 +43,8 @@ public class HexTileMap : MonoBehaviour
                     HexTile currentTile = new HexTile
                     {
                         GridCoordination = tileGridCoordination,
-                        WorldCoordination = _tilemap.CellToWorld(tileGridCoordination)
+                        WorldCoordination = _tilemap.CellToWorld(tileGridCoordination),
+                        TileMap = _tilemap
                     };
 
                     Tiles[i + Math.Abs(_tilemap.origin.x), j + Math.Abs(_tilemap.origin.y)] = currentTile;

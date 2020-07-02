@@ -79,31 +79,33 @@ public class Menu : MonoBehaviourPunCallbacks
     void UpdateLobbyUI()
     {
 
-        Invoke("TryStartGame", 3.0f);
-        
-        //if (PhotonNetwork.PlayerList.Length > 0) { 
-        //    Player1NameText.text = PhotonNetwork.CurrentRoom.GetPlayer(1).NickName;
-        //    Player2NameText.text = PhotonNetwork.PlayerList.Length == 2 ? PhotonNetwork.CurrentRoom.GetPlayer(2).NickName : "...";
+        //Invoke("TryStartGame", 3.0f);
 
-        //    if(PhotonNetwork.PlayerList.Length == 1)
-        //    {
-        //        GameStartingText.text = "Waiting for opponent";
-        //    } else if (PhotonNetwork.PlayerList.Length == 2)
-        //    {
+        if (PhotonNetwork.PlayerList.Length > 0)
+        {
+            Player1NameText.text = PhotonNetwork.CurrentRoom.GetPlayer(1).NickName;
+            Player2NameText.text = PhotonNetwork.PlayerList.Length == 2 ? PhotonNetwork.CurrentRoom.GetPlayer(2).NickName : "...";
 
-        //        GameStartingText.text = "Starting game..";
+            if (PhotonNetwork.PlayerList.Length == 1)
+            {
+                GameStartingText.text = "Waiting for opponent";
+            }
+            else if (PhotonNetwork.PlayerList.Length == 2)
+            {
 
-        //        if (PhotonNetwork.IsMasterClient)
-        //        {
-        //            Invoke("TryStartGame", 3.0f);
-        //        }
-        //    }
-        //}
+                GameStartingText.text = "Starting game..";
+
+                if (PhotonNetwork.IsMasterClient)
+                {
+                    Invoke("TryStartGame", 3.0f);
+                }
+            }
+        }
     }
 
     void TryStartGame()
     {
-        if(PhotonNetwork.PlayerList.Length == 1)
+        if(PhotonNetwork.PlayerList.Length == 2)
         {
             NetworkManager.Instance.photonView.RPC("LoadLevel", RpcTarget.All, "Game");
         }  else

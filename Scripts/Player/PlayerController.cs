@@ -52,7 +52,6 @@ public class PlayerController : MonoBehaviourPunCallbacks
 
     }
 
-
     private void Move()
     {
 
@@ -69,37 +68,48 @@ public class PlayerController : MonoBehaviourPunCallbacks
 
             HexTile destination = PathFinder.Instance.WalkableTileMap.GetHexTileOnWorldPosition(Camera.main.ScreenToWorldPoint(Input.mousePosition));
 
-            //Vector3 direction = new Vector3(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"), 0);
-            //Vector3 velocity = direction * MoveSpeed;
-            //_body.velocity = velocity;
+            PathRequestManager.Instance.RequestPath(this.transform.position, destination.WorldCoordination, OnPathRequestDone);
 
-            if(destination != null) {
-                if(_movingRoutine != null)
-                {
-                    StopCoroutine(_movingRoutine);
-                }
-                _movingRoutine =  StartCoroutine(MoveToPosition(destination.WorldCoordination));
-            }
+
         }
     
     }
 
-    private IEnumerator MoveToPosition(Vector3 destination)
+    public void OnPathRequestDone(HexTile[] path, bool pathFound)
     {
+        if (pathFound)
+        {
+            if (_movingRoutine != null)
+            {
+                StopCoroutine(_movingRoutine);
+            }
+            _movingRoutine = StartCoroutine(FollowPath(path));
+        }
+    }
+
+    private IEnumerator FollowPath(HexTile[] path)
+    {
+        int currentWayPoint = 0;
+        Vector3 wayPoint = path[currentWayPoint].WorldCoordination;
         while (true)
         {
-            if(this.transform.position != destination)
+            if(this.transform.position == wayPoint)
             {
-                this.transform.position = Vector3.MoveTowards(this.transform.position, destination, Time.deltaTime * MoveSpeed);
-                yield return null;
-            } else
-            {
-                yield break;
-            }
+                currentWayPoint++;
+                if(path.Length > currentWayPoint)
+                {
+                    wayPoint = path[currentWayPoint].WorldCoordination;
+                }
+                else
+                {
+                    yield break;
+                }
 
+            }
+            this.transform.position = Vector3.MoveTowards(this.transform.position, wayPoint, Time.deltaTime * MoveSpeed);
+            yield return null;
         }
 
-        
 
     }
 

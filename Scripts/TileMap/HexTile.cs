@@ -85,6 +85,8 @@ public class HexTile
 
                 Vector3Int neighborCoordination = new Vector3Int(checkX, checkY, TileMap.origin.z);
 
+               
+
                 TileBase neighbor = TileMap.GetTile(neighborCoordination);
 
 

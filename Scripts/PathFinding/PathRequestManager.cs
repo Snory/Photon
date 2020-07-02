@@ -16,8 +16,20 @@ public class PathRequestManager : MonoBehaviour
 
 
 
-    // Start is called before the first frame update
-    public static void RequestPath(Vector3 pathStart, Vector3 pathEnd, PathResult pathResultCallback)
+    private void Awake()
+    {
+        if (_instance == null)
+        {
+            _instance = this;
+        }
+        else
+        {
+            Debug.LogError("[PathRequestManager]: Someone is trying to initialize pathfinder");
+        }
+    }
+
+
+    public void RequestPath(Vector3 pathStart, Vector3 pathEnd, PathResult pathResultCallback)
     {
         PathRequest newPathRequest = new PathRequest(pathStart, pathEnd, pathResultCallback);
         Instance._pathRequestQueue.Enqueue(newPathRequest);
@@ -37,7 +49,7 @@ public class PathRequestManager : MonoBehaviour
 
     }
 
-    public void PathProcessingFinished(HexTile[] path, bool success)
+    private void PathProcessingFinished(HexTile[] path, bool success)
     {
         _currentPathRequest._pathResultCallback(path, success);
         _isProcessing = false;
