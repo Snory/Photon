@@ -89,16 +89,16 @@ public class PlayerController : MonoBehaviourPunCallbacks
 
     private IEnumerator FollowPath(HexTile[] path)
     {
-        int currentWayPoint = 0;
-        Vector3 wayPoint = path[currentWayPoint].WorldCoordination;
+        int currentWayPointIndex = 0;
+        Vector3 wayPointCoordination = path[currentWayPointIndex].WorldCoordination;
         while (true)
         {
-            if(this.transform.position == wayPoint)
+            if(this.transform.position == wayPointCoordination)
             {
-                currentWayPoint++;
-                if(path.Length > currentWayPoint)
+                currentWayPointIndex++;
+                if(path.Length > currentWayPointIndex)
                 {
-                    wayPoint = path[currentWayPoint].WorldCoordination;
+                    wayPointCoordination = path[currentWayPointIndex].WorldCoordination;
                 }
                 else
                 {
@@ -106,9 +106,12 @@ public class PlayerController : MonoBehaviourPunCallbacks
                 }
 
             }
-            this.transform.position = Vector3.MoveTowards(this.transform.position, wayPoint, Time.deltaTime * MoveSpeed);
+        
+            
+            this.transform.position = Vector3.MoveTowards(this.transform.position, wayPointCoordination, MoveSpeed * Time.deltaTime);
             yield return null;
         }
+
 
 
     }
