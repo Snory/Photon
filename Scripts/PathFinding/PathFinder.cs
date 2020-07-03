@@ -84,7 +84,7 @@ public class PathFinder : MonoBehaviour
             }
 
             //musime najit sousedy
-            foreach (Vector3Int neighbourCoordination in currentTile.GetNeighborCoordinationsInDistance(1))
+            foreach (Vector3Int neighbourCoordination in currentTile.GetNeighborCoordinations(1))
             {
 
                 HexTile neighbour = WalkableTileMap.GetHexTileOnGridPosition(neighbourCoordination);
