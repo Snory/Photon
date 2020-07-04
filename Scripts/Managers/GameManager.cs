@@ -5,7 +5,7 @@ using Photon.Pun;
 using Photon.Realtime;
 using System.Linq;
 
-public class GameManager : MonoBehaviourPun
+public class GameManager : MonoBehaviourPunCallbacks
 {
     [Header("Stats")]
 
@@ -18,7 +18,6 @@ public class GameManager : MonoBehaviourPun
     public string PlayerPrefabLocation;
     public Transform[] SpawnPoints;
     public PlayerController[] Players;
-    public int PlayerWithHat;
     private int _playersInGame;
 
     public static GameManager _instance;
@@ -40,6 +39,7 @@ public class GameManager : MonoBehaviourPun
     {
 
         Players = new PlayerController[PhotonNetwork.PlayerList.Length];
+
         photonView.RPC("IAmInGame", RpcTarget.AllBuffered);
     
     }

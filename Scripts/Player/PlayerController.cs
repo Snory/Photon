@@ -13,20 +13,15 @@ public class PlayerController : MonoBehaviourPunCallbacks
     [HideInInspector]
     public int PlayerId { get; set; }
 
-
-    [Header("Info")]
-    public float MoveSpeed;
     public float JumpForce;
     public GameObject HatObject;
 
 
     [Header("Component")]
     [SerializeField]
-    private Rigidbody2D _body;
     public Player PhotonPlayer;
 
-
-    private Coroutine _movingRoutine;
+     
 
 
     [PunRPC]
@@ -36,92 +31,29 @@ public class PlayerController : MonoBehaviourPunCallbacks
         PlayerId = player.ActorNumber;
         GameManager.Instance.Players[PlayerId - 1] = this;
 
-        if (!photonView.IsMine)
-            _body.isKinematic = true;
+        Debug.Log($"Player {player.NickName} inicialized and is min is {photonView.IsMine}");
+
+        GameObject unitObj = PhotonNetwork.Instantiate("Unit", this.transform.position, Quaternion.identity);
+        Unit unitScript = unitObj.GetComponent<Unit>();
+
+        unitScript.IsMine = photonView.IsMine;
+
+        Debug.Log("Unit initialized");
 
     }
 
 
-    private void Update()
-    {
-        if (photonView.IsMine) { 
-            Rotate();
-            Move();
-        }
+   
 
 
-    }
-
-    private void Move()
-    {
-
-        if (Input.GetMouseButtonDown(0)) { 
-            if(PathFinder.Instance == null)
-            {
-                Debug.LogError("[PlayerController]: PathFinder is not available");
-            }
-
-            if (PathFinder.Instance.WalkableTileMap == null)
-            {
-                Debug.LogError("[PlayerController]: WalkableTileMap is not available");
-            }
-
-            HexTile destination = PathFinder.Instance.WalkableTileMap.GetHexTileOnWorldPosition(Camera.main.ScreenToWorldPoint(Input.mousePosition));
-
-            PathRequestManager.Instance.RequestPath(this.transform.position, destination.WorldCoordination, OnPathRequestDone);
-
-
-        }
     
-    }
 
-    public void OnPathRequestDone(HexTile[] path, bool pathFound)
-    {
-        if (pathFound)
-        {
-            if (_movingRoutine != null)
-            {
-                StopCoroutine(_movingRoutine);
-            }
-            _movingRoutine = StartCoroutine(FollowPath(path));
-        }
-    }
-
-    private IEnumerator FollowPath(HexTile[] path)
-    {
-        int currentWayPointIndex = 0;
-        Vector3 wayPointCoordination = path[currentWayPointIndex].WorldCoordination;
-        while (true)
-        {
-            if(this.transform.position == wayPointCoordination)
-            {
-                currentWayPointIndex++;
-                if(path.Length > currentWayPointIndex)
-                {
-                    wayPointCoordination = path[currentWayPointIndex].WorldCoordination;
-                }
-                else
-                {
-                    yield break;
-                }
-
-            }
-        
-            
-            this.transform.position = Vector3.MoveTowards(this.transform.position, wayPointCoordination, MoveSpeed * Time.deltaTime);
-            yield return null;
-        }
-
-
-
-    }
-
-    private void Rotate()
-    {        
-        Vector3 playerToMouseDirection = Input.mousePosition - Camera.main.WorldToScreenPoint(this.transform.position);
-        var angle = Mathf.Atan2(playerToMouseDirection.y, playerToMouseDirection.x) * Mathf.Rad2Deg;
-         this.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+    //private void Rotate()
+    //{        
+    //    Vector3 playerToMouseDirection = Input.mousePosition - Camera.main.WorldToScreenPoint(this.transform.position);
+    //    var angle = Mathf.Atan2(playerToMouseDirection.y, playerToMouseDirection.x) * Mathf.Rad2Deg;
+    //     this.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
   
     
-    }
+    //}
 }
