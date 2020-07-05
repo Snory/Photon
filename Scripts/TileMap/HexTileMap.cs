@@ -22,9 +22,6 @@ public class HexTileMap : MonoBehaviour
         }
 
         CreateTileMapArray();
-
-
-
     }
 
     private void CreateTileMapArray()

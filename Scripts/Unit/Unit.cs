@@ -7,21 +7,33 @@ public class Unit : MonoBehaviourPun
 {
     private Coroutine _movingRoutine;
     public bool IsMine { get; set; }
-
     [Header("Info")]
     public float MoveSpeed;
     public float test;
     private Rigidbody2D _body;
-
     public HexTile CurrentHexTile;
+    private bool _selected;
+    public GameObject MovementVisualization;
+    private List<GameObject> _movementVisualizationObjects;
+
+    public bool Selected
+    {
+        get => _selected;
+        set
+        {
+            _selected = value;
+            DisplayMovementArea(value);
+        }
+    }
+
+
+
 
     private void Awake()
     {
         _body = this.GetComponent<Rigidbody2D>();
 
     }
-
-
 
     [PunRPC]
     public void Initialize(bool isMine)
@@ -40,6 +52,33 @@ public class Unit : MonoBehaviourPun
     {
         CurrentHexTile = PathFinder.Instance.WalkableTileMap.GetHexTileOnWorldPosition(this.transform.position);
         this.transform.position = CurrentHexTile.WorldCoordination;
+        _movementVisualizationObjects = new List<GameObject>();
+    }
+
+    public void DisplayMovementArea(bool display)
+    {
+
+        if (display)
+        {
+            List<Vector3Int> neighbors = CurrentHexTile.GetNeighborCoordinations(1);
+            foreach (Vector3Int neighbor in neighbors)
+            {
+                //instantiate tiles object to be removed later
+                GameObject movementVisualization = Instantiate(MovementVisualization, PathFinder.Instance.WalkableTileMap.GetHexTileOnGridPosition(neighbor).WorldCoordination, Quaternion.identity);
+                _movementVisualizationObjects.Add(movementVisualization);
+            }
+        }
+        else
+        {
+            foreach (GameObject obj in _movementVisualizationObjects)
+            {
+                Destroy(obj);
+            }
+
+            _movementVisualizationObjects.Clear();
+        }
+
+
     }
 
     private void Move()
@@ -59,13 +98,13 @@ public class Unit : MonoBehaviourPun
 
             HexTile destination = PathFinder.Instance.WalkableTileMap.GetHexTileOnWorldPosition(Camera.main.ScreenToWorldPoint(Input.mousePosition));
 
-            PathRequestManager.Instance.RequestPath(this.transform.position, destination.WorldCoordination, OnPathRequestDone);
+            PathRequestManager.Instance.RequestPath(this.transform.position, destination.WorldCoordination, OnPathRequestProcessed);
 
         }
 
     }
 
-    public void OnPathRequestDone(HexTile[] path, bool pathFound)
+    public void OnPathRequestProcessed(HexTile[] path, bool pathFound)
     {
         if (pathFound)
         {

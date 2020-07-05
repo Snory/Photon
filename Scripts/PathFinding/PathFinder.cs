@@ -68,7 +68,7 @@ public class PathFinder : MonoBehaviour
             HexTile currentTile = openSet[0];
             for (int i = 1; i < openSet.Count; i++)
             {
-                if (openSet[i].FCost < currentTile.FCost || openSet[i].FCost == currentTile.FCost && openSet[i].HCost < currentTile.HCost)
+                if ((openSet[i].FCost < currentTile.FCost || openSet[i].FCost == currentTile.FCost && openSet[i].HCost < currentTile.HCost))
                 {
                     currentTile = openSet[i];
                 }
@@ -96,7 +96,7 @@ public class PathFinder : MonoBehaviour
                 }
 
                 //walkable, close list
-                if (closedSet.Contains(neighbour))
+                if (closedSet.Contains(neighbour) && neighbour.Walkable == false)
                 {
                     continue;
                 }

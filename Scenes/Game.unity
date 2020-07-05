@@ -232,7 +232,7 @@ MonoBehaviour:
   - {fileID: 734646353}
   - {fileID: 2021295585}
   Players: []
-  PlayerWithHat: 0
+  Units: []
 --- !u!114 &538749913
 MonoBehaviour:
   m_ObjectHideFlags: 0

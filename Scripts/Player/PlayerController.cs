@@ -22,6 +22,8 @@ public class PlayerController : MonoBehaviourPunCallbacks
     [SerializeField]
     public Player PhotonPlayer;
 
+    private Unit _selectedUnit;
+
 
     private void Awake()
     {
@@ -86,11 +88,21 @@ public class PlayerController : MonoBehaviourPunCallbacks
 
         Unit selectedUnit = GameManager.Instance.Units.Where(h => h.CurrentHexTile == tile).FirstOrDefault();
 
-        if(selectedUnit != null)
+
+        if (_selectedUnit != null)
+        {
+            _selectedUnit.Selected = false;
+        }
+
+
+        if (selectedUnit != null)
         {
             Debug.Log("Unit selected!");
+            _selectedUnit = selectedUnit;
+            _selectedUnit.Selected = true;
         } else
-        {
+        {         
+            _selectedUnit = null;
             Debug.Log($"Selected tile coordination are {tile.GridCoordination}");
         }
     }

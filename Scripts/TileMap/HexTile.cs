@@ -6,18 +6,15 @@ using UnityEngine.Tilemaps;
 public class HexTile
 {
     public int FCost { get { return GCost + HCost; } }
-
     public int GCost { get; set; }
     public int HCost { get; set; }
     public Vector3Int GridCoordination { get; set; }
-
     public Vector3 WorldCoordination { get; set; }
     public Tilemap TileMap { get; set; }
     public HexTile Parent { get; set; }
-
     public Dictionary<Direction, int[,]> oddHexTileDirectionsCoordinates;
-
     public Dictionary<Direction, int[,]> evenHexTileDirectionsCoordinates;
+    public bool Walkable { get; set; }
 
     public HexTile(Vector3Int GridCoordination, Vector3 WorldCoordination, Tilemap Tilemap)
     {
@@ -25,6 +22,7 @@ public class HexTile
         this.GridCoordination = GridCoordination;
         this.WorldCoordination = WorldCoordination;
         this.TileMap = Tilemap;
+        this.Walkable = true;
 
         oddHexTileDirectionsCoordinates = new Dictionary<Direction, int[,]>();
         evenHexTileDirectionsCoordinates = new Dictionary<Direction, int[,]>();
