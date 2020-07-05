@@ -81,7 +81,7 @@ public class HexTile
         arrayOdd[4] = oddHexTileDirectionsCoordinates[Direction.LEFTBOT];
         arrayOdd[5] = oddHexTileDirectionsCoordinates[Direction.RIGHTBOT];
 
-        return FindNeighborInDistanceAndDirection(distance, arrayEven, arrayOdd);
+        return FindNeighbor(distance, arrayEven, arrayOdd);
 
     }
 
@@ -99,11 +99,11 @@ public class HexTile
             arrayEven[i] = evenHexTileDirectionsCoordinates[allowedDirections[i]];
         }
 
-        return FindNeighborInDistanceAndDirection(distance, arrayEven, arrayOdd);
+        return FindNeighbor(distance, arrayEven, arrayOdd);
 
     }
 
-    private List<Vector3Int> FindNeighborInDistanceAndDirection(int distance, int[][,] arrayEven, int[][,] arrayOdd)
+    private List<Vector3Int> FindNeighbor(int distance, int[][,] arrayEven, int[][,] arrayOdd)
     {
         List<Vector3Int> neighbors = new List<Vector3Int>();
         List<Vector3Int> notScannedNodes = new List<Vector3Int>();

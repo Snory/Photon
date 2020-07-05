@@ -52,8 +52,8 @@ public class PathFinder : MonoBehaviour
         bool pathSuccess = false;
 
 
-        HexTile startTile = WalkableTileMap.GetHexTileOnWorldPosition(startPostion);
-        HexTile endTile = WalkableTileMap.GetHexTileOnWorldPosition(endPosition);
+        HexTile startTile = WalkableTileMap.GetHexTile(startPostion);
+        HexTile endTile = WalkableTileMap.GetHexTile(endPosition);
 
 
         List<HexTile> openSet = new List<HexTile>();
@@ -83,11 +83,11 @@ public class PathFinder : MonoBehaviour
                 break;
             }
 
-            //musime najit sousedy
+            //musime najit sousedy 
             foreach (Vector3Int neighbourCoordination in currentTile.GetNeighborCoordinations(1))
             {
 
-                HexTile neighbour = WalkableTileMap.GetHexTileOnGridPosition(neighbourCoordination);
+                HexTile neighbour = WalkableTileMap.GetHexTile(neighbourCoordination);
 
 
                 if (neighbour == null)
@@ -96,7 +96,7 @@ public class PathFinder : MonoBehaviour
                 }
 
                 //walkable, close list
-                if (closedSet.Contains(neighbour) && neighbour.Walkable == false)
+                if (closedSet.Contains(neighbour) || neighbour.Walkable == false)
                 {
                     continue;
                 }

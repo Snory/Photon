@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class PlayerController : MonoBehaviourPunCallbacks
 { 
@@ -36,8 +37,19 @@ public class PlayerController : MonoBehaviourPunCallbacks
         if (photonView.IsMine) { 
             if (Input.GetMouseButtonDown(0))
             {
-                TrySelect(Camera.main.ScreenToWorldPoint(Input.mousePosition));
+                if (_selectedUnit == null) { 
+                    TrySelectUnit(Camera.main.ScreenToWorldPoint(Input.mousePosition));
+                } else
+                {
+                    TryMoveUnit(Camera.main.ScreenToWorldPoint(Input.mousePosition));
+                }
             }
+
+            if (Input.GetMouseButtonDown(1) || Input.GetKeyDown(KeyCode.Escape))
+            {
+                UnselectedUnit();
+            }
+                   
         }
     }
 
@@ -72,9 +84,9 @@ public class PlayerController : MonoBehaviourPunCallbacks
     }
 
 
-    private void TrySelect(Vector3 position)
+    private void TrySelectUnit(Vector3 position)
     {
-        HexTile tile = PathFinder.Instance.WalkableTileMap.GetHexTileOnWorldPosition(position);
+        HexTile tile = PathFinder.Instance.WalkableTileMap.GetHexTile(position);
 
         if(tile == null)
         {
@@ -89,21 +101,30 @@ public class PlayerController : MonoBehaviourPunCallbacks
         Unit selectedUnit = GameManager.Instance.Units.Where(h => h.CurrentHexTile == tile).FirstOrDefault();
 
 
-        if (_selectedUnit != null)
-        {
-            _selectedUnit.Selected = false;
-        }
-
-
         if (selectedUnit != null)
         {
+
+            UnselectedUnit();
             Debug.Log("Unit selected!");
             _selectedUnit = selectedUnit;
             _selectedUnit.Selected = true;
-        } else
-        {         
+        } 
+    }
+
+
+    private void TryMoveUnit(Vector3 position)
+    {
+
+        _selectedUnit.MoveTo (position);
+        UnselectedUnit();
+    }
+
+    private void UnselectedUnit()
+    {
+        if (_selectedUnit != null)
+        {
+            _selectedUnit.Selected = false;
             _selectedUnit = null;
-            Debug.Log($"Selected tile coordination are {tile.GridCoordination}");
         }
     }
 

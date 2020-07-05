@@ -1,7 +1,10 @@
 ﻿using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using UnityEngine;
+
+
 
 public class Unit : MonoBehaviourPun
 {
@@ -9,7 +12,7 @@ public class Unit : MonoBehaviourPun
     public bool IsMine { get; set; }
     [Header("Info")]
     public float MoveSpeed;
-    public float test;
+    public int MaxDistance;
     private Rigidbody2D _body;
     public HexTile CurrentHexTile;
     private bool _selected;
@@ -25,8 +28,6 @@ public class Unit : MonoBehaviourPun
             DisplayMovementArea(value);
         }
     }
-
-
 
 
     private void Awake()
@@ -48,9 +49,10 @@ public class Unit : MonoBehaviourPun
 
     }
 
+
     private void Start()
     {
-        CurrentHexTile = PathFinder.Instance.WalkableTileMap.GetHexTileOnWorldPosition(this.transform.position);
+        CurrentHexTile = PathFinder.Instance.WalkableTileMap.GetHexTile(this.transform.position);
         this.transform.position = CurrentHexTile.WorldCoordination;
         _movementVisualizationObjects = new List<GameObject>();
     }
@@ -60,11 +62,11 @@ public class Unit : MonoBehaviourPun
 
         if (display)
         {
-            List<Vector3Int> neighbors = CurrentHexTile.GetNeighborCoordinations(1);
+            List<Vector3Int> neighbors = CurrentHexTile.GetNeighborCoordinations(MaxDistance);
             foreach (Vector3Int neighbor in neighbors)
             {
                 //instantiate tiles object to be removed later
-                GameObject movementVisualization = Instantiate(MovementVisualization, PathFinder.Instance.WalkableTileMap.GetHexTileOnGridPosition(neighbor).WorldCoordination, Quaternion.identity);
+                GameObject movementVisualization = Instantiate(MovementVisualization, PathFinder.Instance.WalkableTileMap.GetHexTile(neighbor).WorldCoordination, Quaternion.identity);
                 _movementVisualizationObjects.Add(movementVisualization);
             }
         }
@@ -77,30 +79,26 @@ public class Unit : MonoBehaviourPun
 
             _movementVisualizationObjects.Clear();
         }
-
-
     }
 
-    private void Move()
+    public void MoveTo(Vector3 position)
     {
 
-        if (Input.GetMouseButtonDown(0))
+        if (PathFinder.Instance == null)
         {
-            if (PathFinder.Instance == null)
-            {
-                Debug.LogError("[PlayerController]: PathFinder is not available");
-            }
-
-            if (PathFinder.Instance.WalkableTileMap == null)
-            {
-                Debug.LogError("[PlayerController]: WalkableTileMap is not available");
-            }
-
-            HexTile destination = PathFinder.Instance.WalkableTileMap.GetHexTileOnWorldPosition(Camera.main.ScreenToWorldPoint(Input.mousePosition));
-
-            PathRequestManager.Instance.RequestPath(this.transform.position, destination.WorldCoordination, OnPathRequestProcessed);
-
+            Debug.LogError("[PlayerController]: PathFinder is not available");
         }
+        if (PathFinder.Instance.WalkableTileMap == null)
+        {
+            Debug.LogError("[PlayerController]: WalkableTileMap is not available");
+        }
+
+        HexTile destination = PathFinder.Instance.WalkableTileMap.GetHexTile(position);
+        if (CurrentHexTile.GetDistanceToCoordination(destination.GridCoordination) <= MaxDistance)
+        {
+            PathRequestManager.Instance.RequestPath(this.transform.position, destination.WorldCoordination, OnPathRequestProcessed);
+        }
+
 
     }
 
@@ -131,13 +129,13 @@ public class Unit : MonoBehaviourPun
                 }
                 else
                 {
-                    CurrentHexTile = path[currentWayPointIndex];
+                    CurrentHexTile = path[currentWayPointIndex - 1];
                     yield break;
                 }
 
             }
 
-            this.transform.position = Vector3.MoveTowards(this.transform.position, wayPointCoordination, MoveSpeed * Time.deltaTime);
+            this.transform.position = Vector3.MoveTowards(this.transform.position, wayPointCoordination, MoveSpeed * Time.smoothDeltaTime);
             yield return null;
         }
     }

@@ -48,7 +48,7 @@ public class HexTileMap : MonoBehaviour
     }
 
     
-    public HexTile GetHexTileOnWorldPosition(Vector3 worldPostion)
+    public HexTile GetHexTile(Vector3 worldPostion)
     {
         HexTile tile = null;
 
@@ -57,15 +57,18 @@ public class HexTileMap : MonoBehaviour
         int checkX = tileCoordinatesInGrid.x + Math.Abs(_tilemap.origin.x);
         int checkY = tileCoordinatesInGrid.y + Math.Abs(_tilemap.origin.y);
 
+        Debug.Log($"Check X is {checkX} and Check Y is {checkY}");
+
+
 
         if (checkX < _tilemap.size.x && checkY < _tilemap.size.y)
         {
-            tile = Tiles[checkX, checkY];
+            tile = GetHexTile(checkX, checkY);
         }
         return tile;
     }
 
-    public HexTile GetHexTileOnGridPosition(Vector3Int gridPosition)
+    public HexTile GetHexTile(Vector3Int gridPosition)
     {
         HexTile tile = null;
 
@@ -74,8 +77,19 @@ public class HexTileMap : MonoBehaviour
 
         if (checkX < _tilemap.size.x && checkY < _tilemap.size.y)
         {
-            tile = Tiles[checkX, checkY];
+            tile = GetHexTile(checkX, checkY);
         }
         return tile;
+    }
+
+
+    private HexTile GetHexTile(int row, int column)
+    {
+        if (row < _tilemap.size.x && column < _tilemap.size.y && column >= 0 && row >=0)
+        {
+            return Tiles[row, column];
+        }
+
+        return null;
     }
 }

@@ -188,6 +188,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MoveSpeed: 5
-  test: 0
+  MaxDistance: 6
   MovementVisualization: {fileID: 6401952100148301596, guid: 62be05c571c9fac4984d8288da0352dc,
     type: 3}
