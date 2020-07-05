@@ -18,6 +18,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     public string PlayerPrefabLocation;
     public Transform[] SpawnPoints;
     public PlayerController[] Players;
+    public List<Unit> Units;
     private int _playersInGame;
 
     public static GameManager _instance;
@@ -37,13 +38,10 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     private void Start()
     {
-
         Players = new PlayerController[PhotonNetwork.PlayerList.Length];
-
-        photonView.RPC("IAmInGame", RpcTarget.AllBuffered);
-    
+        Units = new List<Unit>();
+        photonView.RPC("IAmInGame", RpcTarget.AllBuffered);    
     }
-
 
     [PunRPC]
     private void IAmInGame()
@@ -56,11 +54,15 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
     }
 
+
+    //jednou zavolám já sám, jednou se to spustí od dalšího hráče
     private void SpawnPlayer()
     {
+ 
         GameObject playerObj = PhotonNetwork.Instantiate(PlayerPrefabLocation, SpawnPoints[Random.Range(0, SpawnPoints.Length)].position, Quaternion.identity);
         PlayerController playerScript = playerObj.GetComponent<PlayerController>();
 
+        //dám všem ostatním vědět, že jsem ve hře (včetně sebe)
         playerScript.photonView.RPC("Initialize", RpcTarget.All, PhotonNetwork.LocalPlayer);
 
     }

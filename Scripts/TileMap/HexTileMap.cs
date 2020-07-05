@@ -55,8 +55,6 @@ public class HexTileMap : MonoBehaviour
     {
         HexTile tile = null;
 
-        Debug.Log(worldPostion.ToString());
-
         Vector3Int tileCoordinatesInGrid = _tilemap.WorldToCell(new Vector3(worldPostion.x, worldPostion.y, _tilemap.origin.z));
 
         int checkX = tileCoordinatesInGrid.x + Math.Abs(_tilemap.origin.x);

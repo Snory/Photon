@@ -44,6 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6a3d384c0479f74885c3ba5a7c515d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  PlayerId: 0
   JumpForce: 0
   HatObject: {fileID: 0}
 --- !u!114 &615589074

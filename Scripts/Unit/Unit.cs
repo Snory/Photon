@@ -11,23 +11,35 @@ public class Unit : MonoBehaviourPun
     [Header("Info")]
     public float MoveSpeed;
     public float test;
-
-
     private Rigidbody2D _body;
 
+    public HexTile CurrentHexTile;
 
     private void Awake()
     {
         _body = this.GetComponent<Rigidbody2D>();
 
-        if (!photonView.IsMine)
+    }
+
+
+
+    [PunRPC]
+    public void Initialize(bool isMine)
+    {
+        IsMine = isMine;
+
+        if (!isMine)
             _body.isKinematic = true;
+
+        GameManager.Instance.Units.Add(this);
+
 
     }
 
     private void Start()
     {
-        this.transform.position = PathFinder.Instance.WalkableTileMap.GetHexTileOnWorldPosition(this.transform.position).WorldCoordination;
+        CurrentHexTile = PathFinder.Instance.WalkableTileMap.GetHexTileOnWorldPosition(this.transform.position);
+        this.transform.position = CurrentHexTile.WorldCoordination;
     }
 
     private void Move()
@@ -80,6 +92,7 @@ public class Unit : MonoBehaviourPun
                 }
                 else
                 {
+                    CurrentHexTile = path[currentWayPointIndex];
                     yield break;
                 }
 
