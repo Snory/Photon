@@ -9,15 +9,20 @@ using UnityEngine;
 public class Unit : MonoBehaviourPun
 {
     private Coroutine _movingRoutine;
-    public bool IsMine { get; set; }
-    [Header("Info")]
-    public float MoveSpeed;
-    public int MaxDistance;
     private Rigidbody2D _body;
     public HexTile CurrentHexTile;
     private bool _selected;
     public GameObject MovementVisualization;
+    public bool IsMine { get; set; }
     private List<GameObject> _movementVisualizationObjects;
+
+
+
+
+    [Header("Info")]
+    public float MoveSpeed;
+    public int MaxDistance;
+
 
     public bool Selected
     {
@@ -67,6 +72,7 @@ public class Unit : MonoBehaviourPun
             {
                 //instantiate tiles object to be removed later
                 GameObject movementVisualization = Instantiate(MovementVisualization, PathFinder.Instance.WalkableTileMap.GetHexTile(neighbor).WorldCoordination, Quaternion.identity);
+                movementVisualization.transform.parent = this.transform;
                 _movementVisualizationObjects.Add(movementVisualization);
             }
         }
@@ -130,14 +136,22 @@ public class Unit : MonoBehaviourPun
                 currentWayPointIndex++;
                 if (path.Length > currentWayPointIndex)
                 {
-                    wayPointCoordination = path[currentWayPointIndex].WorldCoordination;
+                    HexTile wayPointTile = path[currentWayPointIndex];
+                    if (wayPointTile.Walkable)
+                    {
+                        SetCurrentHexTile(wayPointTile);
+                        wayPointCoordination = wayPointTile.WorldCoordination;
+                    } else
+                    {
+                        MoveTo(path[path.Length -1].WorldCoordination);
+                        yield break;
+                    }                               
                 }
                 else
                 {
-                    CurrentHexTile = path[currentWayPointIndex - 1];
+                    SetCurrentHexTile(path[currentWayPointIndex-1]);
                     yield break;
                 }
-
             }
 
             Vector3 targetDirection = wayPointCoordination - this.transform.position;
@@ -147,5 +161,12 @@ public class Unit : MonoBehaviourPun
             this.transform.position = Vector3.MoveTowards(this.transform.position, wayPointCoordination, MoveSpeed * Time.smoothDeltaTime);
             yield return null;
         }
+    }
+
+    private void SetCurrentHexTile(HexTile tile)
+    {
+        PathFinder.Instance.WalkableTileMap.photonView.RPC("SetIsHexTileWalkable", RpcTarget.All, CurrentHexTile.WorldCoordination, true);
+        CurrentHexTile = tile;
+        PathFinder.Instance.WalkableTileMap.photonView.RPC("SetIsHexTileWalkable", RpcTarget.All, CurrentHexTile.WorldCoordination, false);
     }
 }

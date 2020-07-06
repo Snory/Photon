@@ -1,10 +1,11 @@
-﻿using System;
+﻿using Photon.Pun;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-public class HexTileMap : MonoBehaviour
+public class HexTileMap : MonoBehaviourPun
 {
 
     private Tilemap _tilemap;
@@ -91,5 +92,11 @@ public class HexTileMap : MonoBehaviour
         }
 
         return null;
+    }
+
+    [PunRPC]
+    public void SetIsHexTileWalkable(Vector3 tilePosition, bool walkable)
+    {
+        GetHexTile(tilePosition).Walkable = walkable;
     }
 }

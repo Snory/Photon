@@ -41,6 +41,7 @@ MonoBehaviour:
   - IAmInGame
   - Initialize
   - Instantiate
+  - SetIsHexTileWalkable
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1
