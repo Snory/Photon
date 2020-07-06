@@ -94,9 +94,14 @@ public class Unit : MonoBehaviourPun
         }
 
         HexTile destination = PathFinder.Instance.WalkableTileMap.GetHexTile(position);
-        if (CurrentHexTile.GetDistanceToCoordination(destination.GridCoordination) <= MaxDistance)
+
+
+        if (destination != null)
         {
-            PathRequestManager.Instance.RequestPath(this.transform.position, destination.WorldCoordination, OnPathRequestProcessed);
+            if (CurrentHexTile.GetDistanceToCoordination(destination.GridCoordination) <= MaxDistance)
+            {
+                PathRequestManager.Instance.RequestPath(this.transform.position, destination.WorldCoordination, OnPathRequestProcessed);
+            }
         }
 
 
@@ -134,6 +139,10 @@ public class Unit : MonoBehaviourPun
                 }
 
             }
+
+            Vector3 targetDirection = wayPointCoordination - this.transform.position;
+            var angle = Mathf.Atan2(targetDirection.y, targetDirection.x) * Mathf.Rad2Deg;
+            this.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
 
             this.transform.position = Vector3.MoveTowards(this.transform.position, wayPointCoordination, MoveSpeed * Time.smoothDeltaTime);
             yield return null;

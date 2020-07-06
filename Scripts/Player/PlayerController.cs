@@ -79,7 +79,8 @@ public class PlayerController : MonoBehaviourPunCallbacks
         Unit unitScript = unitObj.GetComponent<Unit>();
         
         //dám všem ostatním vědět, že jsem vytvořil jednotku (včetně sebe)
-        unitScript.photonView.RPC("Initialize", RpcTarget.All, unitScript.IsMine);
+        unitScript.photonView.RPC("Initialize", RpcTarget.Others, false);
+        unitScript.photonView.RPC("Initialize", PhotonPlayer, true);
 
     }
 
@@ -98,7 +99,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
             Debug.Log($"Spawned units are: {unit.CurrentHexTile.WorldCoordination.ToString()}");
         }
 
-        Unit selectedUnit = GameManager.Instance.Units.Where(h => h.CurrentHexTile == tile).FirstOrDefault();
+        Unit selectedUnit = GameManager.Instance.Units.Where(h => h.CurrentHexTile == tile).Where(h => h.IsMine).FirstOrDefault();
 
 
         if (selectedUnit != null)
@@ -115,7 +116,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
     private void TryMoveUnit(Vector3 position)
     {
 
-        _selectedUnit.MoveTo (position);
+        _selectedUnit.MoveTo(position);
         UnselectedUnit();
     }
 
