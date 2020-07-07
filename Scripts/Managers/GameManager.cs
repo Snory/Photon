@@ -7,27 +7,22 @@ using System.Linq;
 
 public class GameManager : MonoBehaviourPunCallbacks
 {
-    [Header("Stats")]
-
-    public bool GameEnded;
-    public float TimeToWin;
-    public float InvicibleDuration;
-    private float _hatPickUpTime;
-
+    
     [Header("Players")]
     public string PlayerPrefabLocation;
     public Transform[] SpawnPoints;
     public PlayerController[] Players;
-    public List<Unit> Units;
+    public List<UnitBase> Units;
     private int _playersInGame;
 
     public static GameManager _instance;
     public static GameManager Instance { get => _instance; set => _instance = value; }
 
+    public int PlayerWithHat;
+
 
     private void Awake()
     {
-        GameEnded = false;
         _playersInGame = 0;
         if(_instance == null)
         {
@@ -39,7 +34,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     private void Start()
     {
         Players = new PlayerController[PhotonNetwork.PlayerList.Length];
-        Units = new List<Unit>();
+        Units = new List<UnitBase>();
         photonView.RPC("IAmInGame", RpcTarget.AllBuffered);    
     }
 
@@ -65,15 +60,5 @@ public class GameManager : MonoBehaviourPunCallbacks
         //dám všem ostatním vědět, že jsem ve hře (včetně sebe)
         playerScript.photonView.RPC("Initialize", RpcTarget.All, PhotonNetwork.LocalPlayer);
 
-    }
-
-    public PlayerController GetPlayerController (int playerId)
-    {
-        return Players.First(x => x.PlayerId == playerId);
-    }
-
-    public PlayerController GetPlayerController(GameObject playerObj)
-    {
-        return Players.First(x => x.gameObject == playerObj);
-    }
+    }             
 }

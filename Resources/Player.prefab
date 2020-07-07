@@ -45,8 +45,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PlayerId: 0
-  JumpForce: 0
-  HatObject: {fileID: 0}
 --- !u!114 &615589074
 MonoBehaviour:
   m_ObjectHideFlags: 0

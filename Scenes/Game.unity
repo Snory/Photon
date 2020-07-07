@@ -222,9 +222,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5780496ce77a764c9d06e650660b879, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GameEnded: 0
-  TimeToWin: 15
-  InvicibleDuration: 1
   PlayerPrefabLocation: Player
   SpawnPoints:
   - {fileID: 1087283345}
@@ -233,6 +230,7 @@ MonoBehaviour:
   - {fileID: 2021295585}
   Players: []
   Units: []
+  PlayerWithHat: 0
 --- !u!114 &538749913
 MonoBehaviour:
   m_ObjectHideFlags: 0

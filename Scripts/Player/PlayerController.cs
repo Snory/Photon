@@ -11,19 +11,15 @@ public class PlayerController : MonoBehaviourPunCallbacks
 { 
 
     [HideInInspector]
-    public float CurHatTime { get; set; }
-
     public int PlayerId;
 
-    public float JumpForce;
-    public GameObject HatObject;
 
 
     [Header("Component")]
     [SerializeField]
     public Player PhotonPlayer;
 
-    private Unit _selectedUnit;
+    private UnitBase _selectedUnit;
 
 
     private void Awake()
@@ -76,7 +72,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
 
         Debug.Log("Unit spawned");
         GameObject unitObj = PhotonNetwork.Instantiate("Unit", this.transform.position, Quaternion.identity);
-        Unit unitScript = unitObj.GetComponent<Unit>();
+        UnitBase unitScript = unitObj.GetComponent<UnitBase>();
         
         //dám všem ostatním vědět, že jsem vytvořil jednotku (včetně sebe)
         unitScript.photonView.RPC("Initialize", RpcTarget.Others, false);
@@ -96,10 +92,10 @@ public class PlayerController : MonoBehaviourPunCallbacks
 
         foreach(var unit in GameManager.Instance.Units)
         {
-            Debug.Log($"Spawned units are: {unit.CurrentHexTile.WorldCoordination.ToString()}");
+            Debug.Log($"Spawned units are: {unit.Movement.CurrentHexTile.WorldCoordination.ToString()}");
         }
 
-        Unit selectedUnit = GameManager.Instance.Units.Where(h => h.CurrentHexTile == tile).Where(h => h.IsMine).FirstOrDefault();
+        UnitBase selectedUnit = GameManager.Instance.Units.Where(h => h.Movement.CurrentHexTile == tile).Where(h => h.IsMine).FirstOrDefault();
 
 
         if (selectedUnit != null)
@@ -115,9 +111,21 @@ public class PlayerController : MonoBehaviourPunCallbacks
 
     private void TryMoveUnit(Vector3 position)
     {
-
-        _selectedUnit.MoveTo(position);
+        _selectedUnit.Movement.MoveTo(position);
+        Debug.Log("Unit moving");
         UnselectedUnit();
+    }
+
+    private void TryAttack(Vector3 position)
+    {
+        //calculate closest point for attack
+        //try to move to the point 
+        //set attack to true
+    }
+
+    public void OnPathDestinationReached()
+    {
+        //if there should be attack, attack
     }
 
     private void UnselectedUnit()
@@ -128,6 +136,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
             _selectedUnit = null;
         }
     }
+
 
 
 

@@ -58,10 +58,6 @@ public class HexTileMap : MonoBehaviourPun
         int checkX = tileCoordinatesInGrid.x + Math.Abs(_tilemap.origin.x);
         int checkY = tileCoordinatesInGrid.y + Math.Abs(_tilemap.origin.y);
 
-        Debug.Log($"Check X is {checkX} and Check Y is {checkY}");
-
-
-
         if (checkX < _tilemap.size.x && checkY < _tilemap.size.y)
         {
             tile = GetHexTile(checkX, checkY);

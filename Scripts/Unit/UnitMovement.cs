@@ -6,53 +6,18 @@ using UnityEngine;
 
 
 
-public class Unit : MonoBehaviourPun
+public class UnitMovement : MonoBehaviourPun
 {
     private Coroutine _movingRoutine;
-    private Rigidbody2D _body;
     public HexTile CurrentHexTile;
-    private bool _selected;
     public GameObject MovementVisualization;
-    public bool IsMine { get; set; }
     private List<GameObject> _movementVisualizationObjects;
-
-
 
 
     [Header("Info")]
     public float MoveSpeed;
     public int MaxDistance;
-
-
-    public bool Selected
-    {
-        get => _selected;
-        set
-        {
-            _selected = value;
-            DisplayMovementArea(value);
-        }
-    }
-
-
-    private void Awake()
-    {
-        _body = this.GetComponent<Rigidbody2D>();
-
-    }
-
-    [PunRPC]
-    public void Initialize(bool isMine)
-    {
-        IsMine = isMine;
-
-        if (!isMine)
-            _body.isKinematic = true;
-
-        GameManager.Instance.Units.Add(this);
-
-
-    }
+    private bool _moving;
 
 
     private void Start()
@@ -64,8 +29,7 @@ public class Unit : MonoBehaviourPun
 
     public void DisplayMovementArea(bool display)
     {
-
-        if (display)
+        if (display && !_moving)
         {
             List<Vector3Int> neighbors = CurrentHexTile.GetNeighborCoordinations(MaxDistance);
             foreach (Vector3Int neighbor in neighbors)
@@ -109,19 +73,14 @@ public class Unit : MonoBehaviourPun
                 PathRequestManager.Instance.RequestPath(this.transform.position, destination.WorldCoordination, OnPathRequestProcessed);
             }
         }
-
-
     }
 
     public void OnPathRequestProcessed(HexTile[] path, bool pathFound)
     {
-        if (pathFound)
-        {
-            if (_movingRoutine != null)
-            {
-                StopCoroutine(_movingRoutine);
-            }
+        if (pathFound && !_moving)
+        {           
             _movingRoutine = StartCoroutine(FollowPath(path));
+            _moving = true;
         }
     }
 
@@ -141,15 +100,17 @@ public class Unit : MonoBehaviourPun
                     {
                         SetCurrentHexTile(wayPointTile);
                         wayPointCoordination = wayPointTile.WorldCoordination;
-                    } else
+                    }
+                    else
                     {
-                        MoveTo(path[path.Length -1].WorldCoordination);
+                        MoveTo(path[path.Length - 1].WorldCoordination);
                         yield break;
-                    }                               
+                    }
                 }
                 else
                 {
-                    SetCurrentHexTile(path[currentWayPointIndex-1]);
+                    _moving = false;
+                    SetCurrentHexTile(path[currentWayPointIndex - 1]);
                     yield break;
                 }
             }
@@ -162,6 +123,7 @@ public class Unit : MonoBehaviourPun
             yield return null;
         }
     }
+
 
     private void SetCurrentHexTile(HexTile tile)
     {
