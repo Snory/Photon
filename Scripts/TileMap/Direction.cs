@@ -1,2 +1,0 @@
-﻿public enum Direction { LEFTTOP, RIGHTTOP, LEFT, RIGHT, LEFTBOT, RIGHTBOT };
-

@@ -12,8 +12,8 @@ public class HexTile
     public Vector3 WorldCoordination { get; set; }
     public Tilemap TileMap { get; set; }
     public HexTile Parent { get; set; }
-    public Dictionary<Direction, int[,]> oddHexTileDirectionsCoordinates;
-    public Dictionary<Direction, int[,]> evenHexTileDirectionsCoordinates;
+    public Dictionary<MovementDirection, int[,]> oddHexTileDirectionsCoordinates;
+    public Dictionary<MovementDirection, int[,]> evenHexTileDirectionsCoordinates;
     public bool Walkable { get; set; }
 
     public HexTile(Vector3Int GridCoordination, Vector3 WorldCoordination, Tilemap Tilemap)
@@ -24,22 +24,22 @@ public class HexTile
         this.TileMap = Tilemap;
         this.Walkable = true;
 
-        oddHexTileDirectionsCoordinates = new Dictionary<Direction, int[,]>();
-        evenHexTileDirectionsCoordinates = new Dictionary<Direction, int[,]>();
+        oddHexTileDirectionsCoordinates = new Dictionary<MovementDirection, int[,]>();
+        evenHexTileDirectionsCoordinates = new Dictionary<MovementDirection, int[,]>();
 
-        evenHexTileDirectionsCoordinates.Add(Direction.LEFTTOP, new int[1, 2] { { -1, 1 } });
-        evenHexTileDirectionsCoordinates.Add(Direction.RIGHTTOP, new int[1, 2] { { -1, 0 } });
-        evenHexTileDirectionsCoordinates.Add(Direction.LEFT, new int[1, 2] { { -1, -1 } });
-        evenHexTileDirectionsCoordinates.Add(Direction.RIGHT, new int[1, 2] { { 0, -1 } });
-        evenHexTileDirectionsCoordinates.Add(Direction.LEFTBOT, new int[1, 2] { { 1, 0 } });
-        evenHexTileDirectionsCoordinates.Add(Direction.RIGHTBOT, new int[1, 2] { { 0, 1 } });
+        evenHexTileDirectionsCoordinates.Add(MovementDirection.LEFTTOP, new int[1, 2] { { -1, 1 } });
+        evenHexTileDirectionsCoordinates.Add(MovementDirection.RIGHTTOP, new int[1, 2] { { -1, 0 } });
+        evenHexTileDirectionsCoordinates.Add(MovementDirection.LEFT, new int[1, 2] { { -1, -1 } });
+        evenHexTileDirectionsCoordinates.Add(MovementDirection.RIGHT, new int[1, 2] { { 0, -1 } });
+        evenHexTileDirectionsCoordinates.Add(MovementDirection.LEFTBOT, new int[1, 2] { { 1, 0 } });
+        evenHexTileDirectionsCoordinates.Add(MovementDirection.RIGHTBOT, new int[1, 2] { { 0, 1 } });
 
-        oddHexTileDirectionsCoordinates.Add(Direction.LEFTTOP, new int[1, 2] { { -1, 0 } });
-        oddHexTileDirectionsCoordinates.Add(Direction.RIGHTTOP, new int[1, 2] { { 1, 0 } });
-        oddHexTileDirectionsCoordinates.Add(Direction.LEFT, new int[1, 2] { { 0, -1 } });
-        oddHexTileDirectionsCoordinates.Add(Direction.RIGHT, new int[1, 2] { { 1, -1 } });
-        oddHexTileDirectionsCoordinates.Add(Direction.LEFTBOT, new int[1, 2] { { 0, 1 } });
-        oddHexTileDirectionsCoordinates.Add(Direction.RIGHTBOT, new int[1, 2] { { 1, 1 } });
+        oddHexTileDirectionsCoordinates.Add(MovementDirection.LEFTTOP, new int[1, 2] { { -1, 0 } });
+        oddHexTileDirectionsCoordinates.Add(MovementDirection.RIGHTTOP, new int[1, 2] { { 1, 0 } });
+        oddHexTileDirectionsCoordinates.Add(MovementDirection.LEFT, new int[1, 2] { { 0, -1 } });
+        oddHexTileDirectionsCoordinates.Add(MovementDirection.RIGHT, new int[1, 2] { { 1, -1 } });
+        oddHexTileDirectionsCoordinates.Add(MovementDirection.LEFTBOT, new int[1, 2] { { 0, 1 } });
+        oddHexTileDirectionsCoordinates.Add(MovementDirection.RIGHTBOT, new int[1, 2] { { 1, 1 } });
 
 
     }
@@ -66,26 +66,26 @@ public class HexTile
         //http://ondras.github.io/rot.js/manual/#hex/indexing
 
         arrayEven = new int[6][,];
-        arrayEven[0] = evenHexTileDirectionsCoordinates[Direction.LEFTTOP];
-        arrayEven[1] = evenHexTileDirectionsCoordinates[Direction.RIGHTTOP];
-        arrayEven[2] = evenHexTileDirectionsCoordinates[Direction.LEFT];
-        arrayEven[3] = evenHexTileDirectionsCoordinates[Direction.RIGHT];
-        arrayEven[4] = evenHexTileDirectionsCoordinates[Direction.LEFTBOT];
-        arrayEven[5] = evenHexTileDirectionsCoordinates[Direction.RIGHTBOT];
+        arrayEven[0] = evenHexTileDirectionsCoordinates[MovementDirection.LEFTTOP];
+        arrayEven[1] = evenHexTileDirectionsCoordinates[MovementDirection.RIGHTTOP];
+        arrayEven[2] = evenHexTileDirectionsCoordinates[MovementDirection.LEFT];
+        arrayEven[3] = evenHexTileDirectionsCoordinates[MovementDirection.RIGHT];
+        arrayEven[4] = evenHexTileDirectionsCoordinates[MovementDirection.LEFTBOT];
+        arrayEven[5] = evenHexTileDirectionsCoordinates[MovementDirection.RIGHTBOT];
 
         arrayOdd = new int[6][,];
-        arrayOdd[0] = oddHexTileDirectionsCoordinates[Direction.LEFTTOP];
-        arrayOdd[1] = oddHexTileDirectionsCoordinates[Direction.RIGHTTOP];
-        arrayOdd[2] = oddHexTileDirectionsCoordinates[Direction.LEFT];
-        arrayOdd[3] = oddHexTileDirectionsCoordinates[Direction.RIGHT];
-        arrayOdd[4] = oddHexTileDirectionsCoordinates[Direction.LEFTBOT];
-        arrayOdd[5] = oddHexTileDirectionsCoordinates[Direction.RIGHTBOT];
+        arrayOdd[0] = oddHexTileDirectionsCoordinates[MovementDirection.LEFTTOP];
+        arrayOdd[1] = oddHexTileDirectionsCoordinates[MovementDirection.RIGHTTOP];
+        arrayOdd[2] = oddHexTileDirectionsCoordinates[MovementDirection.LEFT];
+        arrayOdd[3] = oddHexTileDirectionsCoordinates[MovementDirection.RIGHT];
+        arrayOdd[4] = oddHexTileDirectionsCoordinates[MovementDirection.LEFTBOT];
+        arrayOdd[5] = oddHexTileDirectionsCoordinates[MovementDirection.RIGHTBOT];
 
         return FindNeighbor(distance, arrayEven, arrayOdd);
 
     }
 
-    public List<Vector3Int> GetNeighborCoordinations(int distance, Direction[] allowedDirections)
+    public List<Vector3Int> GetNeighborCoordinations(int distance, MovementDirection[] allowedDirections)
     {
 
         int[][,] arrayEven = new int[allowedDirections.Length][,];

@@ -7,8 +7,10 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
 
+
+public enum PlayerActionType { NONE, MOVE, ATTACK }
 public class PlayerController : MonoBehaviourPunCallbacks
-{ 
+{
 
     [HideInInspector]
     public int PlayerId;
@@ -18,35 +20,87 @@ public class PlayerController : MonoBehaviourPunCallbacks
     [Header("Component")]
     [SerializeField]
     public Player PhotonPlayer;
-
     private UnitBase _selectedUnit;
+    private PlayerActionType _playerAction;
+    private Camera _mainCamera;
 
 
     private void Awake()
     {
-        
+        _mainCamera = Camera.main;
     }
+
+
+    private void Start()
+    {
+        _playerAction = PlayerActionType.NONE;
+    }
+
 
     private void Update()
     {
 
-        if (photonView.IsMine) { 
+
+        if (photonView.IsMine)
+        {
+
+            Vector3 mousePositionInWolrd = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+
+            UpdatePlayerAvailableAction(mousePositionInWolrd);
+
             if (Input.GetMouseButtonDown(0))
             {
-                if (_selectedUnit == null) { 
-                    TrySelectUnit(Camera.main.ScreenToWorldPoint(Input.mousePosition));
-                } else
-                {
-                    TryMoveUnit(Camera.main.ScreenToWorldPoint(Input.mousePosition));
-                }
+                TrySelectUnit(mousePositionInWolrd);
             }
 
-            if (Input.GetMouseButtonDown(1) || Input.GetKeyDown(KeyCode.Escape))
+            if (Input.GetMouseButtonDown(1))
             {
-                UnselectedUnit();
+                switch (_playerAction)
+                {
+                    case PlayerActionType.MOVE:
+                        TryMoveUnit(mousePositionInWolrd);
+                        break;
+                    case PlayerActionType.ATTACK:
+                        TryAttack(mousePositionInWolrd);
+                        break;
+                }            
+                
             }
-                   
         }
+    }
+
+    private void UpdatePlayerAvailableAction(Vector3 position)
+    {
+
+
+        if (_selectedUnit != null)
+        {
+            HexTile tile = PathFinder.Instance.WalkableTileMap.GetHexTile(position);
+
+            if (tile != null && !tile.Walkable)
+            {
+                UnitBase hooverOverUnit = GameManager.Instance.Units.Where(h => h.Movement.CurrentHexTile == tile).FirstOrDefault();
+
+                if(hooverOverUnit != null)
+                {
+                    Debug.Log("Test");
+                }
+
+                //if (!hooverOverUnit.IsMine)
+                //{
+                //    _playerAction = PlayerActionType.ATTACK;
+                //}
+            } else
+            {
+                _playerAction = PlayerActionType.MOVE;
+            }
+
+        }
+        else
+        {
+            _playerAction = PlayerActionType.NONE;
+        }
+
     }
 
     [PunRPC]
@@ -55,8 +109,6 @@ public class PlayerController : MonoBehaviourPunCallbacks
         PhotonPlayer = player;
         PlayerId = player.ActorNumber;
         GameManager.Instance.Players[PlayerId - 1] = this;
-
-        Debug.Log($"Player {player.NickName} inicialized and is min is {photonView.IsMine} and object name is {this.gameObject.name}");
 
 
         if (player.IsLocal)
@@ -70,11 +122,9 @@ public class PlayerController : MonoBehaviourPunCallbacks
     private void SpawnUnits()
     {
 
-        Debug.Log("Unit spawned");
         GameObject unitObj = PhotonNetwork.Instantiate("Unit", this.transform.position, Quaternion.identity);
         UnitBase unitScript = unitObj.GetComponent<UnitBase>();
-        
-        //dám všem ostatním vědět, že jsem vytvořil jednotku (včetně sebe)
+
         unitScript.photonView.RPC("Initialize", RpcTarget.Others, false);
         unitScript.photonView.RPC("Initialize", PhotonPlayer, true);
 
@@ -85,43 +135,40 @@ public class PlayerController : MonoBehaviourPunCallbacks
     {
         HexTile tile = PathFinder.Instance.WalkableTileMap.GetHexTile(position);
 
-        if(tile == null)
-        {
-            Debug.Log("No tile selected");
-        }
-
-        foreach(var unit in GameManager.Instance.Units)
-        {
-            Debug.Log($"Spawned units are: {unit.Movement.CurrentHexTile.WorldCoordination.ToString()}");
-        }
-
         UnitBase selectedUnit = GameManager.Instance.Units.Where(h => h.Movement.CurrentHexTile == tile).Where(h => h.IsMine).FirstOrDefault();
 
 
         if (selectedUnit != null)
         {
-
             UnselectedUnit();
-            Debug.Log("Unit selected!");
             _selectedUnit = selectedUnit;
             _selectedUnit.Selected = true;
-        } 
+        }
+        else
+        {
+            UnselectedUnit();
+        }
     }
 
 
     private void TryMoveUnit(Vector3 position)
     {
         _selectedUnit.Movement.MoveTo(position);
-        Debug.Log("Unit moving");
         UnselectedUnit();
     }
 
     private void TryAttack(Vector3 position)
     {
         //calculate closest point for attack
+        HexTile tile = PathFinder.Instance.WalkableTileMap.GetHexTile(position);
+        UnitBase enemyUnit = GameManager.Instance.Units.Where(h => h.Movement.CurrentHexTile == tile).Where(h => !h.IsMine).FirstOrDefault();
+
+        Debug.Log("Attack");
         //try to move to the point 
         //set attack to true
     }
+
+  
 
     public void OnPathDestinationReached()
     {
