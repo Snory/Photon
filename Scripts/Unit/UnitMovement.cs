@@ -9,6 +9,7 @@ using UnityEngine;
 public class UnitMovement : MonoBehaviourPun
 {
     private Coroutine _movingRoutine;
+    public Vector3 CurrentTileCoordination;
     public HexTile CurrentHexTile;
     public GameObject MovementVisualization;
     private List<GameObject> _movementVisualizationObjects;
@@ -22,9 +23,6 @@ public class UnitMovement : MonoBehaviourPun
 
     private void Start()
     {
-        SetCurrentHexTile(this.transform.position);
-
-        this.transform.position = CurrentHexTile.WorldCoordination;
         _movementVisualizationObjects = new List<GameObject>();
     }
 
@@ -100,7 +98,7 @@ public class UnitMovement : MonoBehaviourPun
                     if (wayPointTile.Walkable)
                     {
                         wayPointCoordination = wayPointTile.WorldCoordination;
-                        SetCurrentHexTile(wayPointCoordination);
+                        this.photonView.RPC("SetCurrentHexTile", RpcTarget.All, wayPointCoordination);
                     }
                     else
                     {
@@ -111,7 +109,8 @@ public class UnitMovement : MonoBehaviourPun
                 else
                 {
                     _moving = false;
-                    SetCurrentHexTile(wayPointCoordination);
+                    this.photonView.RPC("SetCurrentHexTile", RpcTarget.All, wayPointCoordination);
+
                     yield break;
                 }
             }
@@ -125,18 +124,23 @@ public class UnitMovement : MonoBehaviourPun
         }
     }
 
-
+    [PunRPC]
     private void SetCurrentHexTile(Vector3 worldCoordination)
-    {   
-        Debug.Log($"Setting tile on position {worldCoordination.ToString()}");
-        HexTile tile = PathFinder.Instance.WalkableTileMap.GetHexTile(worldCoordination);
+    {  
+ 
 
+        Debug.Log($"Setting tile on position {worldCoordination.ToString()} by {photonView.Owner.NickName} and {photonView.ViewID}");
+        HexTile tile = PathFinder.Instance.WalkableTileMap.GetHexTile(worldCoordination);
         if (CurrentHexTile != null)
         {
             HexTile oldTile = CurrentHexTile;
             PathFinder.Instance.WalkableTileMap.photonView.RPC("SetIsHexTileWalkable", RpcTarget.All, oldTile.WorldCoordination, true);
+        } else
+        {
+            this.transform.position = tile.WorldCoordination;
         }
         CurrentHexTile = tile;
+        CurrentTileCoordination = CurrentHexTile.WorldCoordination;
         PathFinder.Instance.WalkableTileMap.photonView.RPC("SetIsHexTileWalkable", RpcTarget.All, CurrentHexTile.WorldCoordination, false);
      
     }
