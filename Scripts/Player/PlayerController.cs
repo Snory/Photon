@@ -19,9 +19,8 @@ public class PlayerController : MonoBehaviourPunCallbacks
     private UnitBase _selectedPlayerUnit;
     private UnitBase _selectedEnemyUnit;
     private UnitBase _pointedUnit;
-    private PlayerActionType _playerAction;
     private Camera _mainCamera;
-
+    private bool _attack;
 
     private void Awake()
     {
@@ -29,10 +28,6 @@ public class PlayerController : MonoBehaviourPunCallbacks
     }
 
 
-    private void Start()
-    {
-        _playerAction = PlayerActionType.NONE;
-    }
 
 
     private void Update()
@@ -43,67 +38,28 @@ public class PlayerController : MonoBehaviourPunCallbacks
         {
 
             Vector3 mousePositionInWolrd = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            UpdatePlayerAvailableAction(mousePositionInWolrd);
-            DisplayActionArea();
 
             if (Input.GetMouseButtonDown(0))
             {
-                TrySelectPlayerUnit(mousePositionInWolrd);
+                TrySelectUnit(mousePositionInWolrd);
             }
+
 
             if (Input.GetMouseButtonDown(1))
             {
-                switch (_playerAction)
+                if(_selectedEnemyUnit != null)
                 {
-                    case PlayerActionType.MOVE:
-                        TryMoveUnit(mousePositionInWolrd);
-                        break;
-                    case PlayerActionType.ATTACK:
-                        TryAttack();
-                        break;
+                    TryAttack(mousePositionInWolrd);
+                } else
+                {
+                    TryMoveUnit(mousePositionInWolrd);
                 }
             }
+
         }
     }
 
-    private void UpdatePlayerAvailableAction(Vector3 position)
-    {
 
-
-        if (_selectedPlayerUnit != null)
-        {
-            HexTile tile = PathFinder.Instance.WalkableTileMap.GetHexTile(position);
-
-            if (tile != null && !tile.Walkable)
-            {
-                UnitBase hooverOverUnit = GameManager.Instance.Units.Where(h => h.Movement.CurrentHexTile == tile).Where(h => !h.IsMine).FirstOrDefault();
-
-                if (hooverOverUnit != null)
-                {
-                    _playerAction = PlayerActionType.ATTACK;
-                    _selectedEnemyUnit = hooverOverUnit;
-                }
-
-
-            }
-            else
-            {
-                _playerAction = PlayerActionType.MOVE;
-                _selectedPlayerUnit.Attack.HideAttackRange();
-            }
-
-        }
-        else
-        {
-            _playerAction = PlayerActionType.NONE;
-            _selectedEnemyUnit = null;
-            if(_selectedPlayerUnit != null)
-            {
-                _selectedPlayerUnit.Attack.HideAttackRange();
-            }
-        }
-
-    }
 
     [PunRPC]
     public void Initialize(Player player)
@@ -134,75 +90,86 @@ public class PlayerController : MonoBehaviourPunCallbacks
 
 
 
-    private void DisplayActionArea()
-    {
-        switch (_playerAction)
-        {
-            case PlayerActionType.ATTACK:
-                _selectedPlayerUnit.Attack.DisplayAttackRange(_selectedEnemyUnit.Movement.CurrentHexTile, _selectedPlayerUnit.Movement.MaxDistance);
-                break;
-        }
-    }
-
-    private void TrySelectPlayerUnit(Vector3 position)
+    private void TrySelectUnit(Vector3 position)
     {
         HexTile tile = PathFinder.Instance.WalkableTileMap.GetHexTile(position);
         UnitBase hooverOverUnit = GameManager.Instance.Units.Where(h => h.Movement.CurrentHexTile == tile).FirstOrDefault();
 
-
         if (hooverOverUnit != null)
         {
-            UnselectedUnit();
-            _selectedPlayerUnit = hooverOverUnit;
-            _selectedPlayerUnit.Selected = true;
+            if (hooverOverUnit.IsMine)
+            {
+                UnselectedPlayerUnit();
+                _selectedPlayerUnit = hooverOverUnit;
+                _selectedPlayerUnit.Selected = true;
+                _selectedPlayerUnit.Movement.PathFinished += OnPathDestinationReached;
+            } else
+            {
+                UnselectEnemyUnit();
+                Debug.Log("Selected enemy unit");
+                _selectedEnemyUnit = hooverOverUnit;
+                if(_selectedPlayerUnit != null)
+                {
+                    _selectedPlayerUnit.Attack.DisplayAttackRange(_selectedEnemyUnit.Movement.CurrentHexTile, _selectedPlayerUnit.Movement, _selectedPlayerUnit.Attack.AttackRange); ;
+                }
+            }
+
         }
         else
         {
-            UnselectedUnit();
+            UnselectedPlayerUnit();
+            UnselectEnemyUnit();
         }
     }
 
+
     private void TryMoveUnit(Vector3 position)
     {
-        _selectedPlayerUnit.Movement.MoveTo(position);
-        UnselectedUnit();
+        if(_selectedPlayerUnit != null) { 
+            _selectedPlayerUnit.Movement.MoveTo(position);
+            UnselectedPlayerUnit();
+        }
     }
 
-    private void TryAttack()
+    private void TryAttack(Vector3 position)
     {
+        Debug.Log("Trying to attack");
+        TryMoveUnit(position);
+        _attack = true;
 
-        if(_pointedUnit != null && !_pointedUnit.IsMine) {
-       
-            bool inEnemyInRange = _pointedUnit.Movement.CurrentHexTile.GetDistanceToCoordination(_selectedPlayerUnit.Movement.CurrentHexTile.GridCoordination) <= _selectedPlayerUnit.Movement.MaxDistance;
-            if (inEnemyInRange)
-            {
-                Debug.Log("Attack");
-                
-
-            }
-        }       
-        //try to move to the point 
-        //set attack to true
     }
 
 
 
     public void OnPathDestinationReached()
     {
-        //if there should be attack, attack
+        if (_attack)
+        {
+            Debug.Log("Attacking!");
+        }
+        _attack = false;
     }
 
-    private void UnselectedUnit()
+    private void UnselectedPlayerUnit()
     {
         if (_selectedPlayerUnit != null)
         {
+            _selectedPlayerUnit.Movement.PathFinished -= OnPathDestinationReached;
             _selectedPlayerUnit.Selected = false;
             _selectedPlayerUnit.Attack.HideAttackRange();
             _selectedPlayerUnit = null;
         }
     }
 
-
+    private void UnselectEnemyUnit()
+    {
+        if (_selectedEnemyUnit != null)
+        {
+              _selectedEnemyUnit.Selected = false;
+            _selectedEnemyUnit.Attack.HideAttackRange();
+            _selectedEnemyUnit = null;
+        }
+    }
 
 
 

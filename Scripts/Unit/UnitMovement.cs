@@ -1,10 +1,11 @@
 ﻿using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
-
 using UnityEngine;
 
 
+
+public delegate void PathFinished();
 
 public class UnitMovement : MonoBehaviourPun
 {
@@ -13,6 +14,7 @@ public class UnitMovement : MonoBehaviourPun
     public HexTile CurrentHexTile;
     public GameObject MovementVisualization;
     private List<GameObject> _movementVisualizationObjects;
+    public event PathFinished PathFinished;
 
 
     [Header("Info")]
@@ -47,6 +49,14 @@ public class UnitMovement : MonoBehaviourPun
             }
 
             _movementVisualizationObjects.Clear();
+        }
+    }
+
+    public void RaisePathFinished()
+    {
+        if(PathFinished != null)
+        {
+            PathFinished();
         }
     }
 
@@ -109,6 +119,7 @@ public class UnitMovement : MonoBehaviourPun
                 else
                 {
                     _moving = false;
+                    RaisePathFinished();
                     this.photonView.RPC("SetCurrentHexTile", RpcTarget.All, wayPointCoordination);
 
                     yield break;
@@ -127,8 +138,6 @@ public class UnitMovement : MonoBehaviourPun
     [PunRPC]
     private void SetCurrentHexTile(Vector3 worldCoordination)
     {  
- 
-
         Debug.Log($"Setting tile on position {worldCoordination.ToString()} by {photonView.Owner.NickName} and {photonView.ViewID}");
         HexTile tile = PathFinder.Instance.WalkableTileMap.GetHexTile(worldCoordination);
         if (CurrentHexTile != null)

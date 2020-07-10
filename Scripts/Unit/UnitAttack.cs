@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class UnitAttack : MonoBehaviour
@@ -18,13 +19,14 @@ public class UnitAttack : MonoBehaviour
     }
 
 
-    public void DisplayAttackRange(HexTile aroundTile, int maxDistance)
+    public void DisplayAttackRange(HexTile aroundTile, UnitMovement movement, int maxDistance)
     {
         List<Vector3Int> neighbors = aroundTile.GetNeighborCoordinations(AttackRange);
-           
+         
         
-        foreach (Vector3Int neighbor in neighbors)
-        {
+        foreach (Vector3Int neighbor in neighbors.Where(n => movement.CurrentHexTile.GetDistanceToCoordination(n) <= movement.MaxDistance))
+        {            
+
             GameObject attackVisualization = Instantiate(AttackVisualization, PathFinder.Instance.WalkableTileMap.GetHexTile(neighbor).WorldCoordination, Quaternion.identity);
             attackVisualization.transform.parent = this.transform;
             _attackVisualization.Add(attackVisualization);
